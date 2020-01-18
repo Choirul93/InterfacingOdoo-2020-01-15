@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tahu"/>
+    <TextView
+        android:id="@+id/tvQty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="100"/>
+    <TextView
+        android:id="@+id/tvUom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="pcs"/>
+    <TextView
+        android:id="@+id/tvPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1.000.000"/>
+
+</LinearLayout>
