@@ -48,6 +48,7 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
     ProductProductAdapter productProductAdapter;
 
     List<SalesOrderLine> salesOrderLineList = new ArrayList<>();
+    double total_price = 0;
 
 
     @Override
@@ -66,6 +67,8 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
         tvItem = findViewById(R.id.tvItem);
         pbProduct = findViewById(R.id.pbProduct);
         tvQty = findViewById(R.id.tvQty);
+
+        productProductList = ProductProduct.readAll(this);
 
         productProductAdapter = new ProductProductAdapter(this,productProductList,this);
 
@@ -119,8 +122,8 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
 
     public void updateItem(){
         int size = salesOrderLineList.size();
-        double total_price = 0;
         double qty = 0;
+
         for (int i = 0; i<size; i++ ){
             total_price += salesOrderLineList.get(i).getPrice_unit()*salesOrderLineList.get(i).getProduct_uom_qty();
             qty += salesOrderLineList.get(i).getProduct_uom_qty();
@@ -145,6 +148,7 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
                 Gson gson = new Gson();
                 String soLine = gson.toJson(salesOrderLineList);
                 intent.putExtra("soLine",soLine);
+                intent.putExtra("total_price",total_price);
                 startActivity(intent);
             }
         });
@@ -207,6 +211,8 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
                 //odoo.MessageDialog(ProductListActivity.this,"Length ==> "+length);
                 if(length>0){
 
+                    new DbHelper(ProductListActivity.this).deleteAll(DbHelper.TABLE_PRODUCT_PRODUCT);
+
                     for(int i=0; i<length; i++){
                         ProductProduct productProduct = new ProductProduct();
                         Map<String, Object> classObj = (Map<String, Object>) classObjs[i];
@@ -215,6 +221,7 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
 
                         Log.i("", "setData: id ===>"+(Integer)classObj.get("id"));
                         productProductList.add(productProduct);
+                        ProductProduct.insert(productProduct,ProductListActivity.this);
 
                     }
                     runOnUiThread(new Runnable() {

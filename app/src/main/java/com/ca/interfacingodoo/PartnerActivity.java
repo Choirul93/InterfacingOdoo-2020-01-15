@@ -35,8 +35,10 @@ public class PartnerActivity extends AppCompatActivity {
 
     ListView listViewPartner;
     List arrayListPartner;
+    List arrayListPartnerId;
 
     EditText etKeyword;
+    String sourceActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +50,12 @@ public class PartnerActivity extends AppCompatActivity {
         serverAddress = SharedData.getKey(this,"serverAddress");
         database = SharedData.getKey(this,"database");
 
+        sourceActivity = getIntent().getStringExtra("sourceActivity");
+
         odoo = new OdooUtility(serverAddress,"object");
 
         arrayListPartner = new ArrayList();
+        arrayListPartnerId = new ArrayList();
 
         listViewPartner = findViewById(R.id.listViewPartner);
         etKeyword = findViewById(R.id.etKeyword);
@@ -153,11 +158,24 @@ public class PartnerActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 int position = i;
                 String name = (String)arrayListPartner.get(i);
+                int partner_id = (Integer)arrayListPartnerId.get(i);
                 Toast.makeText(PartnerActivity.this,"name ===> "+name,Toast.LENGTH_LONG).show();
 
-                Intent intent = new Intent(PartnerActivity.this, PartnerDetailActivity.class);
-                intent.putExtra("name",name);
-                startActivity(intent);
+                if(sourceActivity != null){
+                    Intent intent = new Intent();
+                    intent.putExtra("partner_id",partner_id);
+                    intent.putExtra("partner_name",name);
+                    setResult(2,intent);
+                    finish();
+
+                } else{
+                    Intent intent = new Intent(PartnerActivity.this, PartnerDetailActivity.class);
+                    intent.putExtra("name",name);
+                    startActivity(intent);
+
+                }
+
+
             }
         });
     }
@@ -174,9 +192,11 @@ public class PartnerActivity extends AppCompatActivity {
                 if(length>0){
                     Toast.makeText(PartnerActivity.this,"partner ada ===>"+length,Toast.LENGTH_LONG).show();
                     arrayListPartner.clear();
+                    arrayListPartnerId.clear();
                     for(int i =0; i<length; i++){
                         Map<String,Object> classObj = (Map<String,Object>) classObjs[i];
                         arrayListPartner.add(classObj.get("name"));
+                        arrayListPartnerId.add((Integer)classObj.get("id"));
                     }
 
                     runOnUiThread(new Runnable() {

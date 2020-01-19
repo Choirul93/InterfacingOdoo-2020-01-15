@@ -3,10 +3,12 @@ package com.ca.interfacingodoo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -35,7 +37,7 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
     private String serverAddress;
     private String database;
 
-    private long searchTaskId, searchSoLineTaskId;
+    private long searchTaskId, searchSoLineTaskId, createTaskId;
 
 
     EditText etDate,
@@ -50,6 +52,15 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
     String name;
     SalesOrder salesOrder;
     private List<SalesOrderLine> salesOrderLineList = new ArrayList<>();
+
+    String date;
+
+    int partner_id;
+    String partner_name;
+    int warehouse_id;
+    String warehouse_name;
+
+    public static final String activity_name = SalesOrderDetailActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +83,18 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
         name = getIntent().getStringExtra("name");
         if(name != null) searchSalesOrderByName();
         else {
-            Intent intent = this.getIntent();
+
             String soLine = getIntent().getStringExtra("soLine");
             Gson gson = new Gson();
             Type listOfClassObject = new TypeToken<ArrayList<SalesOrderLine>>() {}.getType();
             salesOrderLineList.addAll((Collection<? extends SalesOrderLine>) gson.fromJson(soLine, listOfClassObject));
 
             Toast.makeText(this,""+salesOrderLineList.size(),Toast.LENGTH_LONG).show();
+
+            date = Helper.getTimeStamp("yyyy-MM-dd HH:mm:ss");
+            etDate.setText(date);
+            double total = getIntent().getDoubleExtra("total_price",0);
+            etTotal.setText(String.valueOf(total));
 
 
 
@@ -94,7 +110,28 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
         recycleviewSoLine.setAdapter(soLineAdapter);
 
 
+        etCustomer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SalesOrderDetailActivity.this,PartnerActivity.class);
+                intent.putExtra("sourceActivity",activity_name);
+                startActivityForResult(intent,2);
 
+            }
+        });
+
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode ==2){
+            partner_name = data.getStringExtra("partner_name");
+            partner_id = data.getIntExtra("partner_id",0);
+            etCustomer.setText(partner_name);
+        }
     }
 
     void fiilSalesOrderDetail() {
@@ -213,6 +250,14 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
                 }
 
             }
+            else if(id == createTaskId){
+                String crateResult = result.toString();
+                if(crateResult != null){
+                    odoo.MessageDialog(SalesOrderDetailActivity.this,"Berhasil create"+crateResult);
+                    //finish();
+                }
+                else odoo.MessageDialog(SalesOrderDetailActivity.this,"Gagal delete");
+            }
 
             Looper.loop();
 
@@ -220,12 +265,55 @@ public class SalesOrderDetailActivity extends AppCompatActivity {
 
         @Override
         public void onError(long id, XMLRPCException error) {
+            Looper.prepare();
+            odoo.MessageDialog(SalesOrderDetailActivity.this,error.getMessage());
+            Looper.loop();
 
         }
 
         @Override
         public void onServerError(long id, XMLRPCServerException error) {
+            Looper.prepare();
+            odoo.MessageDialog(SalesOrderDetailActivity.this,error.getMessage());
+            Looper.loop();
 
         }
     };
+
+    public void OnCreateSalesOrder(View view) {
+
+        final List salesOrderLine = new ArrayList();
+        int size = salesOrderLineList.size();
+
+        //0 = create,
+        //1 = update,
+        //2 = delete,
+
+        for(int i =0; i<size; i++){
+            final int finalI = i;
+            salesOrderLine.add(Arrays.asList(
+                    0,0,new HashMap(){{
+                        put("product_id",salesOrderLineList.get(finalI).getProduct_id());
+                        put("product_uom_qty",salesOrderLineList.get(finalI).getProduct_uom_qty());
+                        put("product_uom_id",salesOrderLineList.get(finalI).getProduct_uom_id());
+                        put("price_unit",salesOrderLineList.get(finalI).getPrice_unit());
+
+                    }}
+            ));
+
+        }
+
+        List data = Arrays.asList(new HashMap() {{
+            put("date_order", date);
+            put("partner_id", partner_id);
+            put("order_line",salesOrderLine);
+        }});
+
+        createTaskId = odoo.create(listener,
+                database,
+                uid,
+                password,"sale.order",
+                data);
+
+    }
 }

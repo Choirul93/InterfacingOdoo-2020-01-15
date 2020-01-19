@@ -1,5 +1,11 @@
 package com.ca.interfacingodoo;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ProductProduct {
@@ -67,4 +73,41 @@ public class ProductProduct {
         setUom_id(uom_id.id);
         setUom_name(uom_id.value);
     }
+
+    public static long insert(ProductProduct productProduct, Context context){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("odoo_id",productProduct.getId());
+        contentValues.put("name",productProduct.getName());
+        contentValues.put("image_medium", productProduct.getImage_medium());
+        contentValues.put("lst_price",productProduct.getLst_price());
+        contentValues.put("uom_id", productProduct.getUom_id());
+        contentValues.put("uom_name",productProduct.getUom_name());
+
+        return new DbHelper(context).insert(DbHelper.TABLE_PRODUCT_PRODUCT,contentValues);
+    }
+
+    public static List<ProductProduct> readAll(Context context){
+        List<ProductProduct> productProductList = new ArrayList<>();
+        Cursor cursor = DbHelper.getInstance(context).readAll(DbHelper.TABLE_PRODUCT_PRODUCT);
+
+        cursor.moveToFirst();
+
+        for(int i = 0; i<cursor.getCount(); i++){
+            cursor.moveToPosition(i);
+            ProductProduct productProduct = new ProductProduct();
+
+            productProduct.setId(cursor.getInt(cursor.getColumnIndex("odoo_id")));
+            productProduct.setImage_medium(cursor.getString(cursor.getColumnIndex("image_medium")));
+            productProduct.setName(cursor.getString(cursor.getColumnIndex("name")));
+            productProduct.setUom_id(cursor.getInt(cursor.getColumnIndex("uom_id")));
+            productProduct.setUom_name(cursor.getString(cursor.getColumnIndex("uom_name")));
+            productProduct.setLst_price(cursor.getDouble(cursor.getColumnIndex("lst_price")));
+            productProductList.add(productProduct);
+
+        }
+
+        return productProductList;
+    }
+
+
 }
