@@ -171,7 +171,10 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
     public void onSync() {
         pbProduct.setVisibility(View.VISIBLE);
 
-        List conditions = Arrays.asList(Arrays.asList());
+
+        List conditions = Arrays.asList(Arrays.asList(
+
+        ));
 
         Map fields = new HashMap(){{
             put("fields", Arrays.asList(
@@ -179,7 +182,8 @@ public class ProductListActivity extends AppCompatActivity implements ProductPro
                     "name",
                     "image_medium",
                     "uom_id",
-                    "lst_price"
+                    "lst_price",
+                    "qty_available"
             ));
         }};
 

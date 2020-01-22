@@ -43,6 +43,7 @@ public class ProductProductAdapter extends RecyclerView.Adapter<ProductProductAd
         final ProductProduct productProduct = productProductList.get(position);
         holder.tVName.setText(productProduct.getName());
         holder.tvPrice.setText(String.valueOf(productProduct.getLst_price()));
+        holder.tvQty.setText(String.valueOf(productProduct.getQty_available()));
 
         if(!productProduct.getImage_medium().isEmpty()){
             byte[] imageByteArray = Base64.decode(productProduct.getImage_medium(), Base64.DEFAULT);

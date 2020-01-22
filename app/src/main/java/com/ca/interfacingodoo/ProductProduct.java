@@ -15,6 +15,7 @@ public class ProductProduct {
     private int uom_id;
     private String uom_name;
     private double lst_price;
+    private double qty_available;
 
     public Integer getId() {
         return id;
@@ -64,6 +65,14 @@ public class ProductProduct {
         this.lst_price = lst_price;
     }
 
+    public double getQty_available() {
+        return qty_available;
+    }
+
+    public void setQty_available(double qty_available) {
+        this.qty_available = qty_available;
+    }
+
     public void setData(Map<String,Object> classObj){
         setId((Integer) classObj.get("id"));
         setName(OdooUtility.getString(classObj,"name"));
@@ -72,6 +81,8 @@ public class ProductProduct {
         M2OField uom_id = OdooUtility.getMany2One(classObj,"uom_id");
         setUom_id(uom_id.id);
         setUom_name(uom_id.value);
+        setQty_available(OdooUtility.getDouble(classObj,"qty_available"));
+
     }
 
     public static long insert(ProductProduct productProduct, Context context){
@@ -82,6 +93,7 @@ public class ProductProduct {
         contentValues.put("lst_price",productProduct.getLst_price());
         contentValues.put("uom_id", productProduct.getUom_id());
         contentValues.put("uom_name",productProduct.getUom_name());
+        contentValues.put("qty_available",productProduct.getQty_available());
 
         return new DbHelper(context).insert(DbHelper.TABLE_PRODUCT_PRODUCT,contentValues);
     }
@@ -102,12 +114,15 @@ public class ProductProduct {
             productProduct.setUom_id(cursor.getInt(cursor.getColumnIndex("uom_id")));
             productProduct.setUom_name(cursor.getString(cursor.getColumnIndex("uom_name")));
             productProduct.setLst_price(cursor.getDouble(cursor.getColumnIndex("lst_price")));
+            productProduct.setQty_available(cursor.getDouble(cursor.getColumnIndex("qty_available")));
             productProductList.add(productProduct);
 
         }
 
         return productProductList;
     }
+
+
 
 
 }

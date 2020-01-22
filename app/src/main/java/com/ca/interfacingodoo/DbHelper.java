@@ -37,6 +37,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 "name TEXT, " +
                 "image_medium TEXT, " +
                 "lst_price REAL,"+
+                "qty_available REAL,"+
                 "odoo_id INTEGER,"+
                 "uom_id INTEGER,"+
                 "uom_name TEXT)");
